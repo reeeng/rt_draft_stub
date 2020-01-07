@@ -5,23 +5,23 @@
     <title>Title</title>
 </head>
 <body>
-    <form action="/update" method="post">
-        <div>
+<form action="/update" method="post">
+    <div>
         <button onclick="reformatJSON()" type="button">Reformat</button>
         <button type="submit">Update</button>
-        </div>
-        <textarea id="items" name="items" style="width: 1000px; height: 400px;">{{items | safe}}</textarea>
-    </form>
-    <script>
-        window.onload = function () {
-            reformatJSON();
-        };
-        
-        function reformatJSON() {
-            var text = document.getElementById("items").value;
-            text = JSON.stringify(JSON.parse(text), null, 2);
-            document.getElementById("items").value = text;
-        }
-    </script>
+    </div>
+    <label for="items">Items Json:</label><textarea id="items" name="items" style="width: 1000px; height: 400px;">{{items | safe}}</textarea>
+</form>
+<script>
+    window.onload = function () {
+        reformatJSON();
+    };
+
+    function reformatJSON() {
+        var text = document.getElementById("items").value;
+        text = JSON.stringify(JSON.parse(text), null, 2);
+        document.getElementById("items").value = text;
+    }
+</script>
 </body>
 </html>

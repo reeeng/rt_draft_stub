@@ -1,8 +1,10 @@
+import json
 from typing import List
 
 import flask
 
 app = flask.Flask(__name__)
+store = None
 
 
 class Vector3:
@@ -16,48 +18,74 @@ class Vector3:
         self.z = z
 
     def to_json(self):
-        return {'x': self.x, 'y': self.y, 'z': self.z}
+        return dict(x=self.x, y=self.y, z=self.z)
+
+    def __repr__(self):
+        return f"({self.x}, {self.y}, {self.z})"
 
 
 class Item:
     id = 0
     position: Vector3 = Vector3(0, 0, 0)
-    size: Vector3 = Vector3(0, 0, 0)
+    rotation: Vector3 = Vector3(0, 0, 0)
 
-    def __init__(self, id: int, position: Vector3, size: Vector3):
+    def __init__(self, id: int, position: Vector3, rotation: Vector3):
         self.id = id
         self.position = position
-        self.size = size
+        self.rotation = rotation
 
     def to_json(self):
-        return {'Id': self.id, 'Position': self.position.to_json(), 'Size': self.size.to_json()},
+        return dict(id=self.id, position=self.position.to_json(), rotation=self.rotation.to_json())
+
+    def __repr__(self):
+        return f"(id: {self.id}, position: {self.position}, rotation: {self.rotation})"
 
 
 @app.route("/api/item")
 def items():
     return flask.jsonify(Store.get_instance().to_json())
-    pass
 
 
 @app.route("/api/item/<int:id>")
 def item(id: int):
     return flask.jsonify(Store.get_instance().items[id].to_json())
-    pass
 
 
 @app.route("/")
 def home():
     return flask.render_template("index.html", items=flask.json.dumps(Store.get_instance().to_json()))
+
+
+@app.route("/update", methods=["POST"])
+def update():
+    rawItems = json.loads(flask.request.form["items"])
+    rawItems = rawItems["items"] if rawItems else None
+
+    if not rawItems:
+        return flask.redirect("/")
+
+    newItems = []
+
+    for rawItem in rawItems:
+        # rawItem = rawItem[0]
+        position = rawItem.get("position")
+        rotation = rawItem.get("rotation")
+        newItem = Item(rawItem.get("id"), Vector3(position.get("x"), position.get("y"), position.get("z")),
+                       Vector3(rotation.get("x"), rotation.get("y"), rotation.get("z")))
+        newItems.append(newItem)
+
+    Store.get_instance().items = newItems
+    return flask.redirect("/")
+
+
 class Store:
     items: List[Item] = None
 
     @staticmethod
     def get_instance():
-        store = getattr(flask.g, "_store", None)
-
+        global store
         if store is None:
-            store = flask.g._store = Store()
-
+            store = Store()
         return store
 
     def __init__(self):
@@ -68,10 +96,8 @@ class Store:
         ]
 
     def to_json(self):
-        return {
-            "Items": [item.to_json() for item in self.items]
-        }
+        return dict(items=list(map(lambda item: item.to_json(), self.items)))
 
 
 if __name__ == "__main__":
-    app.run(port=8085)
+    app.run(host="localhost", port=8085)
