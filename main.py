@@ -28,17 +28,19 @@ class Item:
     id = 0
     position: Vector3 = Vector3(0, 0, 0)
     rotation: Vector3 = Vector3(0, 0, 0)
+    type = 0
 
-    def __init__(self, id: int, position: Vector3, rotation: Vector3):
+    def __init__(self, id: int, position: Vector3, rotation: Vector3, type: int):
         self.id = id
         self.position = position
         self.rotation = rotation
+        self.type = type
 
     def to_json(self):
-        return dict(id=self.id, position=self.position.to_json(), rotation=self.rotation.to_json())
+        return dict(id=self.id, position=self.position.to_json(), rotation=self.rotation.to_json(), type=self.type)
 
     def __repr__(self):
-        return f"(id: {self.id}, position: {self.position}, rotation: {self.rotation})"
+        return f"(id: {self.id}, position: {self.position}, rotation: {self.rotation}, type: {self.type})"
 
 
 @app.route("/api/item")
@@ -71,7 +73,7 @@ def update():
         position = rawItem.get("position")
         rotation = rawItem.get("rotation")
         newItem = Item(rawItem.get("id"), Vector3(position.get("x"), position.get("y"), position.get("z")),
-                       Vector3(rotation.get("x"), rotation.get("y"), rotation.get("z")))
+                       Vector3(rotation.get("x"), rotation.get("y"), rotation.get("z")), rawItem.get("type"))
         newItems.append(newItem)
 
     Store.get_instance().items = newItems
@@ -90,9 +92,10 @@ class Store:
 
     def __init__(self):
         self.items = [
-            Item(0, Vector3(0, 0, 0), Vector3(1, 1, 1)),
-            Item(1, Vector3(1, 1, 0), Vector3(1, 1, 1)),
-            Item(2, Vector3(0, 0, 3), Vector3(1, 1, 1)),
+            Item(0, Vector3(0, 0, 0), Vector3(0, -90, 0), 1),
+            Item(1, Vector3(0, 0, 2), Vector3(0, -90, 0), 1),
+            Item(2, Vector3(2, 0, 0), Vector3(0, 180, 0), 2),
+            Item(3, Vector3(0, 0, 4), Vector3(0, 0, 0), 1),
         ]
 
     def to_json(self):
@@ -100,4 +103,4 @@ class Store:
 
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8085)
+    app.run(host="0.0.0.0", port=8085)
