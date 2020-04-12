@@ -92,10 +92,7 @@ class Store:
 
     def __init__(self):
         self.items = [
-            Item(0, Vector3(0, 0, 0), Vector3(0, -90, 0), 1),
-            Item(1, Vector3(0, 0, 2), Vector3(0, -90, 0), 1),
-            Item(2, Vector3(2, 0, 0), Vector3(0, 180, 0), 2),
-            Item(3, Vector3(0, 0, 4), Vector3(0, 0, 0), 1),
+            Item(0, Vector3(0, 0, 0), Vector3(0, -90, 0), 4)
         ]
 
     def to_json(self):
